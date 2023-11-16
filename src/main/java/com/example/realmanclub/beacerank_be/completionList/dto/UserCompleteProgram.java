@@ -1,4 +1,4 @@
-package com.example.realmanclub.beacerank_be.user.dto;
+package com.example.realmanclub.beacerank_be.completionList.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserSignInDTO {
-    private int id;
-    private String password;
+public class UserCompleteProgram {
+    public int id;
+    public String completeCode;
 }
