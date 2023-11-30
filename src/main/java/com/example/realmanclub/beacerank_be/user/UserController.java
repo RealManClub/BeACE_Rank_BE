@@ -1,12 +1,13 @@
 package com.example.realmanclub.beacerank_be.user;
 
+import com.example.realmanclub.beacerank_be.Message;
+import com.example.realmanclub.beacerank_be.StatusEnum;
 import com.example.realmanclub.beacerank_be.completionList.CompletionList;
 import com.example.realmanclub.beacerank_be.user.dto.UserInfoDTO;
 import com.example.realmanclub.beacerank_be.user.dto.UserSignInDTO;
 import com.example.realmanclub.beacerank_be.user.dto.UserSignUpDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,21 +28,42 @@ public class UserController {
     }
 
     @PostMapping("/signUp")
-    public ResponseEntity<User> signUp(@RequestBody UserSignUpDTO userSignUpDTO) {
-        User user = userService.signUpUser(userSignUpDTO);
-        if (!userSignUpDTO.getPassword().equals(userSignUpDTO.getConfirmPassword())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Message> signUp(@RequestBody UserSignUpDTO userSignUpDTO) {
+        Message message = new Message();
+        message.setStatusEnum(StatusEnum.BAD_REQUEST);
+
+        if (userService.duplicateId(userSignUpDTO.getId())) {
+            message.setMessage("중복되는 아이디입니다.");
+            return ResponseEntity.ok(message);
         }
-        return ResponseEntity.ok(user);
+        if (!userSignUpDTO.getPassword().equals(userSignUpDTO.getConfirmPassword())) {
+            message.setMessage("비밀번호가 다릅니다.");
+            return ResponseEntity.ok(message);
+        }
+
+        User user = userService.signUpUser(userSignUpDTO);
+
+        message.setStatusEnum(StatusEnum.OK);
+        message.setMessage("로그인 성공");
+        message.setData(user);
+
+        return ResponseEntity.ok(message);
     }
 
     @PostMapping("/signIn")
-    public ResponseEntity<String> singIn(@RequestBody UserSignInDTO userSignInDTO) {
-        if (userService.signInUser(userSignInDTO)) {
-            return ResponseEntity.ok("로그인 완료");
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Message> singIn(@RequestBody UserSignInDTO userSignInDTO) {
+        Message message = new Message();
+
+        if (!userService.signInUser(userSignInDTO)) {
+            message.setMessage("로그인 실패");
+            return ResponseEntity.ok(message);
         }
+
+        message.setStatusEnum(StatusEnum.OK);
+        message.setMessage("로그인 성공");
+        message.setData(userSignInDTO);
+
+        return ResponseEntity.ok(message);
     }
 
     @GetMapping("/findUserInfo")
@@ -50,7 +72,7 @@ public class UserController {
     }
 
     @GetMapping("/findUserCompletionList")
-    public ResponseEntity<List<CompletionList>> findCom(@RequestParam int userId) {
-        return ResponseEntity.ok(userService.findCom(userId));
+    public ResponseEntity<List<CompletionList>> findUserCompleteList(@RequestParam int userId) {
+        return ResponseEntity.ok(userService.findUserCompleteList(userId));
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,6 @@ public class UserService {
         user.setId(userSignUpDTO.getId());
         user.setName(userSignUpDTO.getName());
         user.setDeptId(userSignUpDTO.getDeptName());
-        user.setScore(userSignUpDTO.getCurrentBeACEScore());
         user.setGrade(userSignUpDTO.getGrade());
         user.setDeviation(1);
         user.setPassword(userSignUpDTO.getPassword());
@@ -52,8 +52,12 @@ public class UserService {
         return userInfoDTO;
     }
 
-    public List<CompletionList> findCom(int userId) {
+    public List<CompletionList> findUserCompleteList(int userId) {
         User user = userRepository.findById(userId).get();
         return user.getCompletionList();
+    }
+
+    public boolean duplicateId(int userId) {
+        return userRepository.existsById(userId);
     }
 }
